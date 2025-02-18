@@ -16,7 +16,7 @@ public class DeviceController {
     @Autowired
     private DeviceService deviceService;
 
-    // Add a new device
+    // Post request to add a new device
     @PostMapping
     public Device addDevice(@RequestBody Device device) {
         return deviceService.addDevice(device);
