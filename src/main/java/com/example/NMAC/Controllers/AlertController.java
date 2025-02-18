@@ -1,6 +1,7 @@
 package com.example.NMAC.Controllers;
 
 import com.example.NMAC.Models.Alert;
+import com.example.NMAC.Models.AnalysisResult;
 import com.example.NMAC.Service.AlertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +25,9 @@ public class AlertController {
     @GetMapping("/{deviceId}")
     public List<Alert> getAlertsByDevice(@PathVariable Long deviceId) {
         return alertService.getAlertsByDevice(deviceId);
+    }
+    @GetMapping("/all devices")
+    public List<Alert> getallresults() {
+        return alertService.getallalerts();
     }
 }

@@ -23,5 +23,9 @@ public class AlertService {
     public List<Alert> getAlertsByDevice(Long deviceId) {
         return alertRepository.findByDeviceId(deviceId);
     }
+
+    public List<Alert> getallalerts() {
+        return alertRepository.findAll();
+    }
 }
 

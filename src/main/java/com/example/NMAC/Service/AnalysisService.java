@@ -33,6 +33,10 @@ public class AnalysisService {
         result.setTimestamp(LocalDateTime.now());
         return analysisResultRepository.save(result);
     }
+
+    public List<AnalysisResult> getallreults() {
+        return analysisResultRepository.findAll();
+    }
 }
 
 
