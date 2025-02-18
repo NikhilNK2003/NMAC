@@ -27,7 +27,7 @@ public class AlertController {
     public List<Alert> getAlertsByDevice(@PathVariable Long deviceId) {
         return alertService.getAlertsByDevice(deviceId);
     }
-    @GetMapping("/all devices")
+    @GetMapping
     public List<Alert> getallresults() {
         return alertService.getallalerts();
     }

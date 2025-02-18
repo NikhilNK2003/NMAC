@@ -38,5 +38,9 @@ public class MetricService {
     public List<Metric> getMetricsByDevice(Long deviceId) {
         return metricRepository.findByDeviceId(deviceId);
     }
+
+    public List<Metric> getallmetrics() {
+        return metricRepository.findAll();
+    }
 }
 

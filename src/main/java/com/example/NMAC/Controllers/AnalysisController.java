@@ -21,7 +21,7 @@ public class AnalysisController {
         return analysisService.analyzeDeviceMetrics(deviceId, metricType);
     }
 
-    @GetMapping("/all devices")
+    @GetMapping
     public List<AnalysisResult> getallresults() {
         return analysisService.getallreults();
     }

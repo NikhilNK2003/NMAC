@@ -26,4 +26,9 @@ public class MetricController {
     public List<Metric> getMetricsByDevice(@PathVariable Long deviceId) {
         return metricService.getMetricsByDevice(deviceId);
     }
+
+    @GetMapping
+    public List<Metric> getMetrics() {
+        return metricService.getallmetrics();
+    }
 }
