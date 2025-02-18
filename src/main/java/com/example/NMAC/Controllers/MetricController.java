@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/metrics")
+@CrossOrigin(origins = "http://localhost:3000/")
 public class MetricController {
 
     @Autowired
