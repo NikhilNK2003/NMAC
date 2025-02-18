@@ -39,7 +39,7 @@ enum DeviceType {
 }
 
 enum DeviceStatus {
-    ACTIVE, INACTIVE
+    Active, Inactive
 }
 
 

@@ -21,7 +21,7 @@ public class AnalysisService {
 
     // Analyze metrics and store results
     public AnalysisResult analyzeDeviceMetrics(Long deviceId, String metricType) {
-        List<Metric> metrics = metricRepository.findByDeviceId(deviceId);
+        List<Metric> metrics = metricRepository.findByDeviceIdAndMetricType(deviceId, metricType);
         OptionalDouble average = metrics.stream().mapToDouble(Metric::getValue).average();
         double maxValue = metrics.stream().mapToDouble(Metric::getValue).max().orElse(0);
 
@@ -31,8 +31,11 @@ public class AnalysisService {
         result.setAverageValue(average.orElse(0));
         result.setMaxValue(maxValue);
         result.setTimestamp(LocalDateTime.now());
-
         return analysisResultRepository.save(result);
     }
 }
+
+
+
+
 

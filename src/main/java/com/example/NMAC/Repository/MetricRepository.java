@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface MetricRepository extends JpaRepository<Metric, Long> {
     List<Metric> findByDeviceId(Long deviceId);
+    List<Metric> findByDeviceIdAndMetricType(Long deviceId, String metricType);
 }
 

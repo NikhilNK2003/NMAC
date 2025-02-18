@@ -15,10 +15,25 @@ public class MetricService {
 
     // Add a new metric
     public Metric addMetric(Metric metric) {
+        try {
+            System.out.println("Adding metric: " + metric);
         metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
-        return metricRepository.save(metric);
+        Metric savedMetric = metricRepository.save(metric);
+        System.out.println("Saved metric: " + savedMetric);
+        return savedMetric;
+        } catch (Exception e) {
+            // Log the exception
+            System.err.println("Error adding metric: " + e.getMessage());
+            throw e;
+        }
     }
-
+//    public Metric addMetric(Metric metric) {
+//        System.out.println("Adding metric: " + metric);
+//        metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
+//        Metric savedMetric = metricRepository.save(metric);
+//        System.out.println("Saved metric: " + savedMetric);
+//        return savedMetric;
+//    }
     // Get metrics by device ID
     public List<Metric> getMetricsByDevice(Long deviceId) {
         return metricRepository.findByDeviceId(deviceId);

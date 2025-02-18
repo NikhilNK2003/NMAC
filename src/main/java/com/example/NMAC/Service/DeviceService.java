@@ -19,8 +19,15 @@ public class DeviceService {
     }
 
     // Get all devices
-    public List<Device> getAllDevices() {
-        return deviceRepository.findAll();
+
+      public List<Device> getAllDevices() {
+        try {
+            return deviceRepository.findAll();
+        } catch (Exception e) {
+            // Log the exception
+            System.err.println("Error fetching devices: " + e.getMessage());
+            throw e;
+        }
     }
 
     // Get device by ID

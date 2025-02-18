@@ -7,5 +7,7 @@ import java.util.List;
 
 @Repository
 public interface AnalysisResultRepository extends JpaRepository<AnalysisResult, Long> {
-    List<AnalysisResult> findByDeviceId(Long deviceId);
+
+    // Custom method to find AnalysisResult by deviceId and metricType
+    List<AnalysisResult> findByDeviceIdAndMetricType(Long deviceId, String metricType);
 }
