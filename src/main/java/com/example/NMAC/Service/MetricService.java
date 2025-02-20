@@ -1,7 +1,9 @@
 package com.example.NMAC.Service;
 
+import com.example.NMAC.Models.Alert;
 import com.example.NMAC.Models.Metric;
 import com.example.NMAC.Repository.MetricRepository;
+import com.example.NMAC.Service.AlertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -12,14 +14,25 @@ public class MetricService {
 
     @Autowired
     private MetricRepository metricRepository;
+    @Autowired
+    private AlertService alertService;
 
     // Add a new metric
     public Metric addMetric(Metric metric) {
         try {
-            System.out.println("Adding metric: " + metric);
-        metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
-        Metric savedMetric = metricRepository.save(metric);
-        System.out.println("Saved metric: " + savedMetric);
+
+            metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
+            Metric savedMetric = metricRepository.save(metric);
+            if ("Latency".equals(metric.getMetricType()) && metric.getValue() > 100) {
+                Alert alert = new Alert(
+                        null,  // ID is auto-generated
+                        metric.getDevice(),
+                        "Latency",
+                        "High latency detected: " + metric.getValue() + "ms",
+                        LocalDateTime.now()
+                );
+                alertService.saveAlert(alert);
+            }
         return savedMetric;
         } catch (Exception e) {
             // Log the exception
@@ -27,13 +40,7 @@ public class MetricService {
             throw e;
         }
     }
-//    public Metric addMetric(Metric metric) {
-//        System.out.println("Adding metric: " + metric);
-//        metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
-//        Metric savedMetric = metricRepository.save(metric);
-//        System.out.println("Saved metric: " + savedMetric);
-//        return savedMetric;
-//    }
+
     // Get metrics by device ID
     public List<Metric> getMetricsByDevice(Long deviceId) {
         return metricRepository.findByDeviceId(deviceId);
