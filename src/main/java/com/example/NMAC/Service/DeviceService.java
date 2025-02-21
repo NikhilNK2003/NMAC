@@ -44,4 +44,18 @@ public class DeviceService {
     public void deleteDevice(Long id) {
         deviceRepository.deleteById(id);
     }
+
+    public Device updateDevice(Long id, Device editedDevice) {
+        Optional<Device> existingDeviceOpt = deviceRepository.findById(id);
+        if (existingDeviceOpt.isPresent()) {
+            Device existingDevice = existingDeviceOpt.get();
+            existingDevice.setDeviceName(editedDevice.getDeviceName());
+            existingDevice.setIpAddress(editedDevice.getIpAddress());
+            existingDevice.setDeviceType(editedDevice.getDeviceType());
+            return deviceRepository.save(existingDevice);
+        } else {
+            throw new RuntimeException("Device not found");
+        }
+    }
+
 }

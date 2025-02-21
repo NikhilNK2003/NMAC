@@ -5,6 +5,7 @@ import com.example.NMAC.Models.User;
 import com.example.NMAC.Repository.RoleRepository;
 import com.example.NMAC.Repository.UserRepository;
 import com.example.NMAC.Security.JwtUtil;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:3000/")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -48,6 +50,7 @@ public class AuthController {
         return Map.of("token", token);
     }
 
+
     @PostMapping("/register")
     public Map<String, String> register(@RequestBody Map<String, String> request) {
         String username = request.get("username");
@@ -65,12 +68,15 @@ public class AuthController {
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(password));
 
+        // Corrected role assignment
         Set<Role> roles = new HashSet<>();
         roles.add(role);
-        newUser.setRoles((List<Role>) roles);
+        newUser.setRoles(roles);  // Ensure User entity stores roles as Set<Role>
 
         userRepository.save(newUser);
 
         return Map.of("message", "User registered successfully");
     }
 }
+
+

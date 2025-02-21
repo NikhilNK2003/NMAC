@@ -3,10 +3,12 @@ package com.example.NMAC.Controllers;
 import com.example.NMAC.Models.Device;
 import com.example.NMAC.Service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/devices")
@@ -16,34 +18,49 @@ public class DeviceController {
     @Autowired
     private DeviceService deviceService;
 
-    // Post request to add a new device
-    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin")
     public Device addDevice(@RequestBody Device device) {
         return deviceService.addDevice(device);
     }
 
-    // Get all devices
-    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','ANALYST','VIEWER')") // ✅ Fixed
+    @GetMapping("/viewer")
     public List<Device> getAllDevices() {
         return deviceService.getAllDevices();
     }
 
-    // Get device by ID
-    @GetMapping("/{id}")
-    public Optional<Device> getDeviceById(@PathVariable Long id) {
-        return deviceService.getDeviceById(id);
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/admin/{id}")
+//    public ResponseEntity<Device> getDeviceById(@PathVariable Long id) {
+//        return deviceService.getDeviceById(id)
+//                .map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+//    }
 
-    // Get device by IP Address
-    @GetMapping("/ip/{ipAddress}")
-    public Device getDeviceByIp(@PathVariable String ipAddress) {
-        return deviceService.getDeviceByIp(ipAddress);
-    }
-
-    // Delete device
-    @DeleteMapping("/{id}")
-    public void deleteDevice(@PathVariable Long id) {
-        deviceService.deleteDevice(id);
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/ip/{ipAddress}")
+//    public ResponseEntity<Device> getDeviceByIp(@PathVariable String ipAddress) {
+//        Device device = deviceService.getDeviceByIp(ipAddress);
+//        return device != null ? ResponseEntity.ok(device) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//    }
+@PreAuthorize("hasRole('ADMIN')")
+@PutMapping("/admin/{id}")
+public ResponseEntity<Device> updateDevice(@PathVariable Long id, @RequestBody Device editedDevice) {
+    try {
+        Device updatedDevice = deviceService.updateDevice(id, editedDevice);
+        return ResponseEntity.ok(updatedDevice);
+    } catch (RuntimeException e) {
+        return ResponseEntity.notFound().build();
     }
 }
 
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+        deviceService.deleteDevice(id);
+        return ResponseEntity.noContent().build();
+    }
+}
