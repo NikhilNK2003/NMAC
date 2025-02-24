@@ -1,6 +1,7 @@
 package com.example.NMAC.Service;
 
 import com.example.NMAC.Models.Alert;
+import com.example.NMAC.Models.AlertSeverity;
 import com.example.NMAC.Models.Metric;
 import com.example.NMAC.Repository.MetricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class MetricService {
     private MetricRepository metricRepository;
     @Autowired
     private AlertService alertService;
+    @Autowired
+    private EmailService emailService;
 
     private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
@@ -28,17 +31,8 @@ public class MetricService {
             metric.setTimestamp(LocalDateTime.now()); // Set current timestamp
             Metric savedMetric = metricRepository.save(metric);
 
-            // Trigger an alert if latency is high
-            if ("Latency".equals(metric.getMetricType()) && metric.getValue() > 100) {
-                Alert alert = new Alert(
-                        null,  // ID is auto-generated
-                        metric.getDevice(),
-                        "Latency",
-                        "High latency detected: " + metric.getValue() + "ms",
-                        LocalDateTime.now()
-                );
-                alertService.saveAlert(alert);
-            }
+            // 🔥 Check and trigger alerts for all parameters
+            checkAndTriggerAlert(metric);
 
             // 🔹 Notify all clients about new data
             notifyClients(savedMetric);
@@ -49,6 +43,125 @@ public class MetricService {
             throw e;
         }
     }
+    private void checkAndTriggerAlert(Metric metric) {
+        String metricType = metric.getMetricType();
+        double value = metric.getValue();
+        String alertMessage = null;
+        AlertSeverity severity = AlertSeverity.MINOR;
+
+        switch (metricType) {
+            case "Latency" -> {
+                if (value > 150) {
+                    alertMessage = "CRITICAL: Extremely high latency detected: " + value + "ms";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 100) {
+                    alertMessage = "MAJOR: High latency detected: " + value + "ms";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Bandwidth" -> {
+                if (value < 20) {
+                    alertMessage = "CRITICAL: Very low bandwidth detected: " + value + " Mbps";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value < 50) {
+                    alertMessage = "MAJOR: Low bandwidth detected: " + value + " Mbps";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Packet Loss" -> {
+                if (value > 10) {
+                    alertMessage = "CRITICAL: Severe packet loss detected: " + value + "%";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 5) {
+                    alertMessage = "MAJOR: High packet loss detected: " + value + "%";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Port Utilization" -> {
+                if (value > 90) {
+                    alertMessage = "CRITICAL: Port utilization extremely high: " + value + "%";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 80) {
+                    alertMessage = "MAJOR: High port utilization detected: " + value + "%";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Throughput" -> {
+                if (value < 20) {
+                    alertMessage = "CRITICAL: Very low throughput detected: " + value + " Mbps";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value < 50) {
+                    alertMessage = "MAJOR: Low throughput detected: " + value + " Mbps";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Error Rate" -> {
+                if (value > 5) {
+                    alertMessage = "CRITICAL: Very high error rate detected: " + value + "%";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 2) {
+                    alertMessage = "MAJOR: High error rate detected: " + value + "%";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Blocked Requests" -> {
+                if (value > 800) {
+                    alertMessage = "CRITICAL: Excessive blocked requests detected: " + value;
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 500) {
+                    alertMessage = "MAJOR: High number of blocked requests: " + value;
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Intrusion Attempts" -> {
+                if (value > 40) {
+                    alertMessage = "CRITICAL: Multiple critical intrusion attempts detected: " + value;
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 20) {
+                    alertMessage = "MAJOR: Multiple intrusion attempts detected: " + value;
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "CPU Load", "CPU Usage" -> {
+                if (value > 95) {
+                    alertMessage = "CRITICAL: CPU load critically high: " + value + "%";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 90) {
+                    alertMessage = "MAJOR: High CPU load detected: " + value + "%";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Memory Usage" -> {
+                if (value > 60) {
+                    alertMessage = "CRITICAL: Very high memory usage: " + value + " GB";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 50) {
+                    alertMessage = "MAJOR: High memory usage detected: " + value + " GB";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+            case "Disk I/O" -> {
+                if (value > 500) {
+                    alertMessage = "CRITICAL: High disk I/O detected: " + value + " MB/s";
+                    severity = AlertSeverity.CRITICAL;
+                } else if (value > 400) {
+                    alertMessage = "MAJOR: Increased disk I/O detected: " + value + " MB/s";
+                    severity = AlertSeverity.WARNING;
+                }
+            }
+        }
+
+        // Save the alert if any condition is met
+        if (alertMessage != null) {
+            Alert alert = new Alert(null, metric.getDevice(), metricType, alertMessage, LocalDateTime.now(), severity);
+            alertService.saveAlert(alert);
+
+            if (severity == AlertSeverity.CRITICAL) {
+                emailService.sendCriticalAlert(alert);
+            }
+        }
+    }
+
 
     // Register an SSE client
     public SseEmitter addEmitter() {

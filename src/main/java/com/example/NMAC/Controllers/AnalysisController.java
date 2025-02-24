@@ -26,7 +26,7 @@ public class AnalysisController {
     @PreAuthorize("hasAnyRole('ADMIN','ANALYST')")
     @GetMapping("/analyst")
     public List<AnalysisResult> getallresults() {
-        return analysisService.getallreults();
+        return analysisService.getAllResults();
     }
 }
 

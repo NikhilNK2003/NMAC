@@ -4,6 +4,8 @@ import com.example.NMAC.Models.Device;
 import com.example.NMAC.Repository.DeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +18,15 @@ public class DeviceService {
     // Add a new device
     public Device addDevice(Device device) {
         return deviceRepository.save(device);
+    }
+
+    //  Add multiple devices at once
+    public List<Device> addDevices(List<Device> devices) {
+        List<Device> savedDevices = new ArrayList<>();
+        for (Device device : devices) {
+            savedDevices.add(deviceRepository.save(device));
+        }
+        return savedDevices;
     }
 
     // Get all devices

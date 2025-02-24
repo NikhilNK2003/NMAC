@@ -24,6 +24,13 @@ public class DeviceController {
         return deviceService.addDevice(device);
     }
 
+    // Add multiple devices
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/addMultiple")
+    public List<Device> addDevices(@RequestBody List<Device> devices) {
+        return deviceService.addDevices(devices);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN','ANALYST','VIEWER')") // ✅ Fixed
     @GetMapping("/viewer")
     public List<Device> getAllDevices() {

@@ -34,12 +34,8 @@ public class Device {
     private DeviceStatus status;
 }
 
-enum DeviceType {
-    ROUTER, SWITCH, FIREWALL, SERVER
-}
 
-enum DeviceStatus {
-    Active, Inactive
-}
+
+
 
 

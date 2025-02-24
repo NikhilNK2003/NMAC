@@ -23,6 +23,9 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = false)  // ✅ Ensure email is unique
+    private String email;
+
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -31,15 +34,14 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;  // ✅ Use Set<Role> instead of List<Role>
+    private Set<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName())) // ✅ Add "ROLE_" prefix dynamically
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toSet());
     }
-
 
     @Override
     public boolean isAccountNonExpired() {

@@ -22,11 +22,18 @@ public class Alert {
     private Device device;
 
     @Column(name = "metric_type", nullable = false)
-    private String metricType; // e.g., "Bandwidth", "Latency"
+    private String metricType;
 
     @Column(name = "alert_message", nullable = false)
     private String alertMessage;
 
     @Column(name = "alert_timestamp", nullable = false)
     private LocalDateTime alertTimestamp;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "severity", nullable = false)
+    private AlertSeverity severity;
+
+
 }
+

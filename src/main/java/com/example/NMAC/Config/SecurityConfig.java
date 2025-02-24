@@ -39,7 +39,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register").permitAll() // Public APIs
+                        .requestMatchers("/auth/login", "/auth/register","/email/send").permitAll() // Public APIs
                         .requestMatchers("/admin/**","/devices/admin/**","/alerts/admin/**","/metrics/admin/**","analysis/admin/**").hasRole("ADMIN")  // ✅ Spring Security expects "ROLE_ADMIN"
                         .requestMatchers("/devices/analyst/**","/alerts/analyst/**","/metrics/analyst/**","analysis/analyst/**").hasAnyRole("ADMIN", "ANALYST") // ✅ "ROLE_ADMIN", "ROLE_ANALYST"
                         .requestMatchers("/devices/viewer/**","/alerts/viewer/**","/metrics/viewer/**","analysis/viewer/**").hasAnyRole("ADMIN", "ANALYST", "VIEWER") // ✅ Everyone
