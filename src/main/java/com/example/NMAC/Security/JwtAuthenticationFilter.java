@@ -32,9 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String requestPath = request.getServletPath();
+        System.out.println("🔍 Incoming Request: " + requestPath);
 
         // ✅ Bypass JWT authentication for public endpoints
         if (requestPath.equals("/auth/login") || requestPath.equals("/auth/register") || requestPath.equals("/email/send")) {
+            System.out.println("✅ Skipping JWT filter for: " + requestPath);
             chain.doFilter(request, response);
             return;
         }
@@ -42,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            System.out.println("❌ No valid Authorization header found");
             chain.doFilter(request, response);
             return;
         }
@@ -52,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             username = jwtUtil.extractUsername(token);
         } catch (ExpiredJwtException | MalformedJwtException | SignatureException e) {
-            System.out.println("Invalid JWT Token: " + e.getMessage());
+            System.out.println("❌ Invalid JWT Token: " + e.getMessage());
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
