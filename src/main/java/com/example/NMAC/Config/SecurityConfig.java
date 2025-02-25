@@ -38,6 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register","/email/send").permitAll() // Public APIs
                         .requestMatchers("/admin/**","/devices/admin/**","/alerts/admin/**","/metrics/admin/**","analysis/admin/**").hasRole("ADMIN")  // ✅ Spring Security expects "ROLE_ADMIN"

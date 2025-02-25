@@ -5,6 +5,7 @@ import com.example.NMAC.Models.User;
 import com.example.NMAC.Repository.RoleRepository;
 import com.example.NMAC.Repository.UserRepository;
 import com.example.NMAC.Security.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
                           UserRepository userRepository, RoleRepository roleRepository,
                           PasswordEncoder passwordEncoder) {
@@ -42,10 +44,12 @@ public class AuthController {
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-        UserDetails userDetails = (UserDetails) userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+//        String role = userDetails.getRoles().getName();
+
+        String token = jwtUtil.generateToken(user);
 
         return Map.of("token", token);
     }
@@ -54,6 +58,7 @@ public class AuthController {
     @PostMapping("/register")
     public Map<String, String> register(@RequestBody Map<String, String> request) {
         String username = request.get("username");
+        String email = request.get("email"); // ✅ Get email from request
         String password = request.get("password");
         String roleName = request.get("role"); // "ADMIN", "ANALYST", "VIEWER"
 
@@ -61,22 +66,27 @@ public class AuthController {
             throw new RuntimeException("Username already exists");
         }
 
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already exists"); // ✅ Check duplicate email
+        }
+
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Invalid role: " + roleName));
 
         User newUser = new User();
         newUser.setUsername(username);
+        newUser.setEmail(email); // ✅ Set email before saving
         newUser.setPassword(passwordEncoder.encode(password));
 
-        // Corrected role assignment
         Set<Role> roles = new HashSet<>();
         roles.add(role);
-        newUser.setRoles(roles);  // Ensure User entity stores roles as Set<Role>
+        newUser.setRoles(roles);
 
         userRepository.save(newUser);
 
         return Map.of("message", "User registered successfully");
     }
+
 }
 
 
