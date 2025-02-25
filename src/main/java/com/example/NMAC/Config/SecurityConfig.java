@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.http.HttpMethod;
 
 @EnableMethodSecurity
 @Configuration
@@ -37,20 +37,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configure(http))
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register","/email/send").permitAll() // Public APIs
-                        .requestMatchers("/admin/**","/devices/admin/**","/alerts/admin/**","/metrics/admin/**","analysis/admin/**").hasRole("ADMIN")  // ✅ Spring Security expects "ROLE_ADMIN"
-                        .requestMatchers("/devices/analyst/**","/alerts/analyst/**","/metrics/analyst/**","analysis/analyst/**").hasAnyRole("ADMIN", "ANALYST") // ✅ "ROLE_ADMIN", "ROLE_ANALYST"
-                        .requestMatchers("/devices/viewer/**","/alerts/viewer/**","/metrics/viewer/**","analysis/viewer/**").hasAnyRole("ADMIN", "ANALYST", "VIEWER") // ✅ Everyone
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/email/send").permitAll() // ✅ Ensure login is accessible
+                        .requestMatchers("/admin/**", "/devices/admin/**", "/alerts/admin/**", "/metrics/admin/**", "/analysis/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/devices/analyst/**", "/alerts/analyst/**", "/metrics/analyst/**", "/analysis/analyst/**").hasAnyRole("ADMIN", "ANALYST")
+                        .requestMatchers("/devices/viewer/**", "/alerts/viewer/**", "/metrics/viewer/**", "/analysis/viewer/**").hasAnyRole("ADMIN", "ANALYST", "VIEWER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        System.out.println("🔒 Security Config Loaded: Login should be accessible");
+
         return http.build();
     }
-
-
 }
