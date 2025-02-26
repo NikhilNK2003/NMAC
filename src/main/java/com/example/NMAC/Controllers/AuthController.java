@@ -6,9 +6,11 @@ import com.example.NMAC.Repository.RoleRepository;
 import com.example.NMAC.Repository.UserRepository;
 import com.example.NMAC.Security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -99,6 +101,23 @@ public class AuthController {
         userRepository.save(newUser);
 
         return Map.of("message", "User registered successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/updatepassword")
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> request) {
+        String newPassword = request.get("newPassword");
+
+        // Get the authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
     }
 
 }
