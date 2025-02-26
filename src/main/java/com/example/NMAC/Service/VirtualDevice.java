@@ -32,8 +32,11 @@ public class VirtualDevice {
         }
 
         for (Device device : devices) {
-            generateDeviceMetrics(device);
+            if ("Active".equalsIgnoreCase(String.valueOf(device.getStatus()))) {
+                generateDeviceMetrics(device);
+            }
         }
+
     }
 
     private void generateDeviceMetrics(Device device) {
