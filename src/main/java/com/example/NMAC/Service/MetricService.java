@@ -156,9 +156,9 @@ public class MetricService {
             Alert alert = new Alert(null, metric.getDevice(), metricType, alertMessage, LocalDateTime.now(), severity);
             alertService.saveAlert(alert);
 
-            if (severity == AlertSeverity.CRITICAL) {
-                emailService.sendCriticalAlert(alert);
-            }
+//            if (severity == AlertSeverity.CRITICAL) {
+//                emailService.sendCriticalAlert(alert);
+//            }
         }
     }
 

@@ -6,14 +6,17 @@ import com.example.NMAC.Repository.RoleRepository;
 import com.example.NMAC.Repository.UserRepository;
 import com.example.NMAC.Security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -38,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> request) {
+    public Map<String, Object> login(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String password = request.get("password");
 
@@ -47,12 +50,25 @@ public class AuthController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-//        String role = userDetails.getRoles().getName();
-
         String token = jwtUtil.generateToken(user);
 
-        return Map.of("token", token);
+        // Extracting role names from Set<Role>
+        Set<String> roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
+        // Construct response
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("id", user.getId());
+        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
+        response.put("roles", roleNames);  // Sending all roles as a Set
+
+        return response;
     }
+
+
 
 
     @PostMapping("/register")
@@ -87,6 +103,22 @@ public class AuthController {
         return Map.of("message", "User registered successfully");
     }
 
-}
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/updatepassword")
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> request) {
+        String newPassword = request.get("newPassword");
 
+        // Get the authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+    }
+
+}
 
