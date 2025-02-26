@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configure(http))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/email/send").permitAll() // ✅ Ensure login is accessible
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/email/send","auth/updatepassword").permitAll() // ✅ Ensure login is accessible
                         .requestMatchers("/admin/**", "/devices/admin/**", "/alerts/admin/**", "/metrics/admin/**", "/analysis/admin/**").hasRole("ADMIN")
                         .requestMatchers("/devices/analyst/**", "/alerts/analyst/**", "/metrics/analyst/**", "/analysis/analyst/**").hasAnyRole("ADMIN", "ANALYST")
                         .requestMatchers("/devices/viewer/**", "/alerts/viewer/**", "/metrics/viewer/**", "/analysis/viewer/**").hasAnyRole("ADMIN", "ANALYST", "VIEWER")

@@ -8,6 +8,7 @@ import com.example.NMAC.Service.ExcelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -73,20 +74,8 @@ public class UserController {
     }
 
     // Update user password (Admin only)
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/updatepassword")
-    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String newPassword = request.get("newPassword");
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
-    }
 
     // Delete a user by username (Admin only)
     @PreAuthorize("hasRole('ADMIN')")
